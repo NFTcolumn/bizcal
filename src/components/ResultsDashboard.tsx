@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import type { WizardData } from '../types/wizard';
 import { calculateWizardMetrics } from '../utils/wizardCalculator';
 import MetricCard from './MetricCard';
+import AIStrategist from './AIStrategist';
 
 interface ResultsDashboardProps {
     data: WizardData;
@@ -40,6 +41,8 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ data, onUpdate, onR
                     </div>
                 </div>
             </div>
+
+            <AIStrategist data={data} metrics={metrics} />
 
             <div className="grid">
                 <MetricCard
