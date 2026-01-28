@@ -16,6 +16,7 @@ export interface CalculationResult {
   targetPrice: number;
   totalRevenue: number;
   totalProfit: number;
+  effectiveHourlyRate: number;
 }
 
 /**
@@ -29,31 +30,36 @@ export const calculateMetrics = (
   fixedCosts: CostItem[],
   variableCosts: CostItem[],
   goalProfit: number,
-  expectedUnits: number
+  expectedUnits: number,
+  totalHours: number = 0
 ): CalculationResult => {
   const totalFixed = fixedCosts.reduce((sum, item) => sum + item.amount, 0);
   const unitVariable = variableCosts.reduce((sum, item) => sum + item.amount, 0);
-  
-  const totalUnitCost = expectedUnits > 0 
-    ? (totalFixed / expectedUnits) + unitVariable 
+
+  const totalUnitCost = expectedUnits > 0
+    ? (totalFixed / expectedUnits) + unitVariable
     : unitVariable;
 
   // Price needed to reach goalProfit at expectedUnits
   // (Total Fixed + Total Variable + Goal Profit) / Units
   const totalCostsAtVolume = totalFixed + (unitVariable * expectedUnits);
-  const targetPrice = expectedUnits > 0 
-    ? (totalCostsAtVolume + goalProfit) / expectedUnits 
+  const targetPrice = expectedUnits > 0
+    ? (totalCostsAtVolume + goalProfit) / expectedUnits
     : 0;
 
   // Breakeven Point: Units = Total Fixed / (Price - Unit Variable)
   // Here we use the targetPrice for the breakeven calculation
   const contributionMargin = targetPrice - unitVariable;
-  const breakevenUnits = contributionMargin > 0 
-    ? Math.ceil(totalFixed / contributionMargin) 
+  const breakevenUnits = contributionMargin > 0
+    ? Math.ceil(totalFixed / contributionMargin)
     : 0;
 
   const totalRevenue = targetPrice * expectedUnits;
   const totalProfit = totalRevenue - totalCostsAtVolume;
+
+  const effectiveHourlyRate = totalHours > 0
+    ? totalProfit / totalHours
+    : 0;
 
   return {
     totalFixedCosts: totalFixed,
@@ -62,6 +68,7 @@ export const calculateMetrics = (
     breakevenUnits,
     targetPrice,
     totalRevenue,
-    totalProfit
+    totalProfit,
+    effectiveHourlyRate
   };
 };
