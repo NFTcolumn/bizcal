@@ -1,7 +1,6 @@
 import type { WizardData, GoalBreakdown } from '../types/wizard';
 
 export const calculateWizardMetrics = (data: WizardData) => {
-
     // Variable Costs
     const variableCostPerUnit = data.productionCost + data.shippingCost;
 
@@ -10,35 +9,37 @@ export const calculateWizardMetrics = (data: WizardData) => {
 
     // Target Net Profit per period
     const yearlyProfitGoal = data.yearlyIncomeGoal;
-    const monthlyProfitGoal = yearlyProfitGoal / 12;
-    const weeklyProfitGoal = yearlyProfitGoal / 52;
-    const dailyProfitGoal = weeklyProfitGoal / 5; // Assuming 5-day work week
-
-    // Margin at current unitPrice
     const unitProfit = data.unitPrice - variableCostPerUnit;
 
-    const calculateForPeriod = (period: string, profitGoal: number): GoalBreakdown => {
-        const units = Math.ceil(profitGoal / (unitProfit > 0 ? unitProfit : 0.01));
-        const hours = units * totalTimePerUnit;
-        const revenue = units * data.unitPrice;
+    const calculateForPeriod = (period: string, factor: number): GoalBreakdown => {
+        const periodProfitGoal = yearlyProfitGoal / factor;
+        const periodCapacityHours = (data.weeklyWorkHours * 52) / factor;
+
+        const unitsNeeded = Math.ceil(periodProfitGoal / (unitProfit > 0 ? unitProfit : 0.01));
+        const hoursNeeded = unitsNeeded * totalTimePerUnit;
+
+        const maxUnits = Math.floor(periodCapacityHours / (totalTimePerUnit > 0 ? totalTimePerUnit : 0.1));
+        const actualProfit = maxUnits * unitProfit;
 
         return {
             period,
-            units,
-            hours: Number(hours.toFixed(1)),
-            revenue: Math.round(revenue),
-            profit: Math.round(units * unitProfit)
+            unitsNeeded,
+            maxUnits,
+            hoursNeeded: Number(hoursNeeded.toFixed(1)),
+            actualProfit: Math.round(actualProfit),
+            targetProfit: Math.round(periodProfitGoal)
         };
     };
 
     return {
-        daily: calculateForPeriod('Daily', dailyProfitGoal),
-        weekly: calculateForPeriod('Weekly', weeklyProfitGoal),
-        monthly: calculateForPeriod('Monthly', monthlyProfitGoal),
-        quarterly: calculateForPeriod('Quarterly', yearlyProfitGoal / 4),
-        yearly: calculateForPeriod('Yearly', yearlyProfitGoal),
+        daily: calculateForPeriod('Daily', 52 * 5), // Assumes 5 day week
+        weekly: calculateForPeriod('Weekly', 52),
+        monthly: calculateForPeriod('Monthly', 12),
+        quarterly: calculateForPeriod('Quarterly', 4),
+        yearly: calculateForPeriod('Yearly', 1),
         totalTimePerUnit,
         variableCostPerUnit,
-        currentUnitProfit: unitProfit
+        currentUnitProfit: unitProfit,
+        capacityHoursPerWeek: data.weeklyWorkHours
     };
 };
