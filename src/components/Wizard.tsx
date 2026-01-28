@@ -37,35 +37,28 @@ const Wizard: React.FC<WizardProps> = ({ onComplete }) => {
                         <h2>Product Costs</h2>
                         <div className="grid">
                             <div className="input-group">
-                                <label>Production Cost (Materials)</label>
+                                <label>Material Cost Per Unit ($)</label>
                                 <div className="input-wrapper">
                                     <span>$</span>
                                     <input
                                         type="number"
                                         value={data.productionCost || ''}
                                         onChange={e => updateData('productionCost', parseFloat(e.target.value) || 0)}
-                                        placeholder="0.00"
+                                        placeholder="12"
                                     />
                                 </div>
                             </div>
                             <div className="input-group">
-                                <label>Shipping / Variable Cost</label>
-                                <label>Material Cost Per Unit ($)</label>
-                                <input
-                                    type="number"
-                                    value={data.productionCost || ''}
-                                    onChange={e => updateData('productionCost', parseFloat(e.target.value) || 0)}
-                                    placeholder="12"
-                                />
-                            </div>
-                            <div className="input-group">
-                                <label>Shipping Cost Per Unit ($)</label>
-                                <input
-                                    type="number"
-                                    value={data.shippingCost || ''}
-                                    onChange={e => updateData('shippingCost', parseFloat(e.target.value) || 0)}
-                                    placeholder="10"
-                                />
+                                <label>Shipping / Variable Cost ($)</label>
+                                <div className="input-wrapper">
+                                    <span>$</span>
+                                    <input
+                                        type="number"
+                                        value={data.shippingCost || ''}
+                                        onChange={e => updateData('shippingCost', parseFloat(e.target.value) || 0)}
+                                        placeholder="10"
+                                    />
+                                </div>
                             </div>
                         </div>
                         <div className="btn-row">
@@ -180,7 +173,7 @@ const Wizard: React.FC<WizardProps> = ({ onComplete }) => {
     return (
         <div className="card wizard-container">
             <div className="progress-bar">
-                <div className="progress-fill" style={{ width: `${(step / 4) * 100}%` }}></div>
+                <div className="progress-fill" style={{ width: `${(step / 3) * 100}%` }}></div>
             </div>
             {renderStep()}
         </div>
