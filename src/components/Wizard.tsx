@@ -13,8 +13,9 @@ const Wizard: React.FC<WizardProps> = ({ onComplete }) => {
         shippingCost: 0,
         weeklyWorkHours: 40,
         yearlyIncomeGoal: 60000,
-        leadsPerSale: 5,
-        timePerLead: 0.5,
+        leadsPerSale: 100,
+        prospectingTimeMinutes: 5,
+        closingMeetingTimeHours: 3,
         unitPrice: 100,
         targetVolume: 0
     });
@@ -125,24 +126,32 @@ const Wizard: React.FC<WizardProps> = ({ onComplete }) => {
             case 4:
                 return (
                     <div className="wizard-step">
-                        <h2>Sales & Outreach</h2>
+                        <h2>Sales Funnel Efficiency</h2>
                         <div className="input-group">
-                            <label>How many people do you need to talk to for one sale?</label>
+                            <label>How many leads/people to contact to get 1 sale?</label>
                             <input
                                 type="number"
                                 value={data.leadsPerSale || ''}
                                 onChange={e => updateData('leadsPerSale', parseFloat(e.target.value) || 0)}
+                                placeholder="100"
+                            />
+                        </div>
+                        <div className="input-group">
+                            <label>Time spent per lead contact? (Minutes)</label>
+                            <input
+                                type="number"
+                                value={data.prospectingTimeMinutes || ''}
+                                onChange={e => updateData('prospectingTimeMinutes', parseFloat(e.target.value) || 0)}
                                 placeholder="5"
                             />
                         </div>
                         <div className="input-group">
-                            <label>How long does each negotiation/lead take? (Hours)</label>
+                            <label>Time for final sales/closing meeting? (Hours)</label>
                             <input
                                 type="number"
-                                step="0.1"
-                                value={data.timePerLead || ''}
-                                onChange={e => updateData('timePerLead', parseFloat(e.target.value) || 0)}
-                                placeholder="0.5"
+                                value={data.closingMeetingTimeHours || ''}
+                                onChange={e => updateData('closingMeetingTimeHours', parseFloat(e.target.value) || 0)}
+                                placeholder="3"
                             />
                         </div>
                         <div className="btn-row">

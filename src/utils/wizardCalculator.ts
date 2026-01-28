@@ -4,8 +4,12 @@ export const calculateWizardMetrics = (data: WizardData) => {
     // Variable Costs
     const variableCostPerUnit = data.productionCost + data.shippingCost;
 
-    // Total Time per Sale (Production + Sales efforts)
-    const totalTimePerUnit = data.productionTime + (data.leadsPerSale * data.timePerLead);
+    // Total Time per Sale:
+    // 1. Production time
+    // 2. Prospecting time (Time per lead * Number of leads)
+    // 3. Closing time (The final meeting)
+    const prospectingHoursPerSale = (data.leadsPerSale * data.prospectingTimeMinutes) / 60;
+    const totalTimePerUnit = data.productionTime + prospectingHoursPerSale + data.closingMeetingTimeHours;
 
     // Target Net Profit per period
     const yearlyProfitGoal = data.yearlyIncomeGoal;
@@ -36,6 +40,7 @@ export const calculateWizardMetrics = (data: WizardData) => {
         quarterly: calculateForPeriod('Quarterly', 4),
         yearly: calculateForPeriod('Yearly', 1),
         totalTimePerUnit,
+        prospectingHoursPerSale,
         variableCostPerUnit,
         currentUnitProfit: unitProfit,
         capacityHoursPerWeek: data.weeklyWorkHours,
@@ -43,6 +48,7 @@ export const calculateWizardMetrics = (data: WizardData) => {
     };
 
     const currentAnnualHours = data.targetVolume * totalTimePerUnit;
+    // Effective Hourly Rate: (Total Annual Profit) / (Total Work Hours)
     const effectiveHourlyRate = (data.targetVolume * unitProfit) / (currentAnnualHours || 0.1);
 
     return {
