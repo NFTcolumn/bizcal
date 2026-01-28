@@ -31,7 +31,7 @@ export const calculateWizardMetrics = (data: WizardData) => {
         };
     };
 
-    return {
+    const results = {
         daily: calculateForPeriod('Daily', 52 * 5), // Assumes 5 day week
         weekly: calculateForPeriod('Weekly', 52),
         monthly: calculateForPeriod('Monthly', 12),
@@ -41,5 +41,12 @@ export const calculateWizardMetrics = (data: WizardData) => {
         variableCostPerUnit,
         currentUnitProfit: unitProfit,
         capacityHoursPerWeek: data.weeklyWorkHours
+    };
+
+    const effectiveHourlyRate = results.weekly.actualProfit / (data.weeklyWorkHours || 0.1);
+
+    return {
+        ...results,
+        effectiveHourlyRate: Number(effectiveHourlyRate.toFixed(2))
     };
 };

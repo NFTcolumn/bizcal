@@ -41,13 +41,13 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ data, onUpdate, onR
             </div>
 
             <div className="grid">
-                <MetricCard label="Weekly Potential Profit" value={metrics.weekly.actualProfit.toLocaleString()} prefix="$" />
-                <MetricCard label="Shortfall to Goal" value={isUnderGoal ? weeklyGap.toLocaleString() : '0'} prefix="$" />
-                <MetricCard label="Weekly Capacity" value={data.weeklyWorkHours} suffix="hrs" />
+                <MetricCard label="Potential Weekly Profit" value={metrics.weekly.actualProfit.toLocaleString()} prefix="$" />
+                <MetricCard label="Effective Hourly Rate" value={metrics.effectiveHourlyRate.toFixed(2)} prefix="$" />
+                <MetricCard label="Weekly Time Gap" value={Math.max(0, metrics.weekly.hoursNeeded - data.weeklyWorkHours).toFixed(1)} suffix="hrs" />
             </div>
 
             <div className="card" style={{ marginTop: '2rem' }}>
-                <h3>Optimization Levers (Close the Gap)</h3>
+                <h3>Optimization Levers</h3>
 
                 <div className="input-group">
                     <label>Adjust Unit Price: ${data.unitPrice}</label>
@@ -62,50 +62,50 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ data, onUpdate, onR
                 </div>
 
                 <div className="input-group">
-                    <label>Lower Production Cost: ${data.productionCost}</label>
+                    <label>Material Cost: ${data.productionCost}</label>
                     <input
                         type="range"
                         min="0"
-                        max={Math.max(data.productionCost * 2, 100)}
+                        max={Math.max(data.productionCost * 1.5, 50)}
                         value={data.productionCost}
                         onChange={(e) => handleUpdate('productionCost', parseFloat(e.target.value))}
                         className="slider"
-                        style={{ direction: 'rtl' }} // Visual hint for lowering
                     />
                 </div>
 
                 <div className="input-group">
-                    <label>Work Efficiency (Time per Unit): {data.productionTime} hrs</label>
+                    <label>Production Efficiency (Time per Unit): {data.productionTime} hrs</label>
                     <input
                         type="range"
                         min="0.1"
-                        max={Math.max(data.productionTime * 2, 10)}
+                        max={Math.max(data.productionTime * 1.5, 5)}
                         step="0.1"
                         value={data.productionTime}
                         onChange={(e) => handleUpdate('productionTime', parseFloat(e.target.value))}
                         className="slider"
-                        style={{ direction: 'rtl' }}
                     />
                 </div>
             </div>
 
             <div className="card" style={{ marginTop: '2rem' }}>
-                <h3>Sales Goals Breakdown</h3>
+                <h3>Target vs. Reality</h3>
                 <table className="data-table">
                     <thead>
                         <tr>
                             <th>Period</th>
-                            <th>Max Possible Sales</th>
-                            <th>Current Profit</th>
-                            <th>Target Profit</th>
+                            <th>Units to Goal</th>
+                            <th>Max Capacity Sales</th>
+                            <th>Profit at Capacity</th>
+                            <th>Goal Profit</th>
                         </tr>
                     </thead>
                     <tbody>
                         {[metrics.daily, metrics.weekly, metrics.monthly, metrics.quarterly, metrics.yearly].map(period => (
                             <tr key={period.period}>
                                 <td>{period.period}</td>
+                                <td>{period.unitsNeeded} units</td>
                                 <td style={{ color: period.maxUnits < period.unitsNeeded ? 'var(--danger)' : 'var(--text-main)' }}>
-                                    {period.maxUnits} units ({period.unitsNeeded} needed)
+                                    {period.maxUnits} units
                                 </td>
                                 <td>${period.actualProfit.toLocaleString()}</td>
                                 <td>${period.targetProfit.toLocaleString()}</td>
@@ -135,7 +135,7 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ data, onUpdate, onR
                     <p style={{ fontSize: '0.9rem', lineHeight: '1.4' }}>
                         {isUnderGoal
                             ? `You need to increase price or efficiency by ${Math.ceil((weeklyGap / (metrics.currentUnitProfit || 1)))} units worth of profit to meet your goal.`
-                            : "Maintain consistent lead generation to utilize your 50hr/week capacity."}
+                            : `Your strategy generates $${metrics.effectiveHourlyRate}/hr. You are well within your ${data.weeklyWorkHours}hr/week capacity.`}
                     </p>
                 </div>
             </div>
