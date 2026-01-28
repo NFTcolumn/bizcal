@@ -41,7 +41,7 @@ export const calculateWizardMetrics = (data: WizardData) => {
     const salesTimePercentage = (totalSalesTimePerSale / (totalTimePerUnit || 0.1)) * 100;
 
     return {
-        daily: calculateForPeriod('Daily', 52 * 5),
+        daily: calculateForPeriod('Daily', 365),
         weekly: calculateForPeriod('Weekly', 52),
         monthly: calculateForPeriod('Monthly', 12),
         quarterly: calculateForPeriod('Quarterly', 4),

@@ -17,34 +17,51 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ data, onUpdate, onR
     };
 
     const isUnderProfitGoal = (metrics.yearly.projectedProfit < data.yearlyIncomeGoal);
-    const isOverCapacity = (metrics.currentAnnualHours > metrics.maxAnnualCapacityHours);
+    const isOverCapacity = (metrics.weekly.hoursNeeded > data.weeklyWorkHours);
 
     return (
         <div className="results-container">
-            <div className="card" style={{ marginBottom: '2rem', border: (isUnderProfitGoal || isOverCapacity) ? '1px solid var(--danger)' : '1px solid var(--success)' }}>
-                <h2 style={{ color: (isUnderProfitGoal || isOverCapacity) ? 'var(--danger)' : 'var(--success)', marginBottom: '1rem' }}>
-                    {isOverCapacity ? 'Over Capacity' : isUnderProfitGoal ? 'Target Shortfall' : 'Profitable & Sustainable'}
-                </h2>
-                <div className="grid" style={{ gap: '1rem' }}>
+            <div className="card" style={{
+                marginBottom: '2rem',
+                border: isOverCapacity ? '2px solid var(--danger)' : '2px solid var(--success)',
+                background: isOverCapacity ? 'rgba(255, 71, 87, 0.05)' : 'rgba(46, 213, 115, 0.05)'
+            }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
                     <div>
-                        <p><strong>{metrics.weekly.hoursNeeded} hrs/week</strong> required</p>
-                        <p className="text-muted">Limit: {data.weeklyWorkHours} hrs</p>
+                        <h2 style={{ color: isOverCapacity ? 'var(--danger)' : 'var(--success)', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            {isOverCapacity ? '❗ Plan Not Possible' : '✅ Sustainable Plan'}
+                        </h2>
+                        <p style={{ fontSize: '1.1rem', maxWidth: '600px' }}>
+                            {isOverCapacity
+                                ? `The hours required to hit this volume exceed your limits. You need to increase your price or improve your sales efficiency.`
+                                : `Your plan is solid! You'll earn $${metrics.yearly.projectedProfit.toLocaleString()} within your ${data.weeklyWorkHours}hr/wk limit.`}
+                        </p>
                     </div>
-                    <div>
-                        <p><strong>${metrics.yearly.projectedProfit.toLocaleString()}</strong> projected profit</p>
-                        <p className="text-muted">Goal: ${data.yearlyIncomeGoal.toLocaleString()}</p>
+                    <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Annual Profit</div>
+                        <div style={{ fontSize: '2.4rem', fontWeight: 'bold', color: isUnderProfitGoal ? 'var(--danger)' : 'var(--success)' }}>
+                            ${metrics.yearly.projectedProfit.toLocaleString()}
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div className="grid">
-                <MetricCard label="Raw Leads Needed" value={metrics.weekly.rawLeadsNeeded} suffix=" leads/wk" />
+                <MetricCard
+                    label="Weekly Potential"
+                    value={metrics.weekly.projectedProfit.toLocaleString()}
+                    prefix="$"
+                    status={isOverCapacity ? 'warning' : 'success'}
+                />
                 <MetricCard label="Sales Time %" value={metrics.salesTimePercentage} suffix="%" />
-                <MetricCard label="Effective Hourly Rate" value={metrics.effectiveHourlyRate.toFixed(2)} prefix="$" />
+                <MetricCard label="Effective Rate" value={metrics.effectiveHourlyRate.toFixed(2)} prefix="$" />
             </div>
 
             <div className="card" style={{ marginTop: '2rem' }}>
-                <h3>Friction & Sales Optimization</h3>
+                <h3>Optimization Levers</h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+                    Tweak these to balance your profit goals with your actual time.
+                </p>
 
                 <div className="grid">
                     <div className="input-group">
@@ -53,7 +70,7 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ data, onUpdate, onR
                     </div>
                     <div className="input-group">
                         <label>Unit Price: ${data.unitPrice}</label>
-                        <input type="range" min={Math.ceil(metrics.variableCostPerUnit)} max={Math.max(data.unitPrice * 3, 1000)} value={data.unitPrice} onChange={(e) => handleUpdate('unitPrice', parseFloat(e.target.value))} className="slider" />
+                        <input type="range" min={Math.ceil(metrics.variableCostPerUnit)} max={Math.max(data.unitPrice * 3, 2000)} value={data.unitPrice} onChange={(e) => handleUpdate('unitPrice', parseFloat(e.target.value))} className="slider" />
                     </div>
                 </div>
 
@@ -63,23 +80,23 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ data, onUpdate, onR
                         <input type="range" min="1" max="60" value={data.prospectingTimeMinutes} onChange={(e) => handleUpdate('prospectingTimeMinutes', parseFloat(e.target.value))} className="slider" />
                     </div>
                     <div className="input-group">
-                        <label>Qualification: {data.qualificationTimeMinutes}m / lead</label>
+                        <label>Qualifying: {data.qualificationTimeMinutes}m / lead</label>
                         <input type="range" min="1" max="120" value={data.qualificationTimeMinutes} onChange={(e) => handleUpdate('qualificationTimeMinutes', parseFloat(e.target.value))} className="slider" />
                     </div>
                     <div className="input-group">
-                        <label>Closing Call: {data.closingMeetingTimeHours}h / sale</label>
-                        <input type="range" min="0.5" max="10" step="0.5" value={data.closingMeetingTimeHours} onChange={(e) => handleUpdate('closingMeetingTimeHours', parseFloat(e.target.value))} className="slider" />
+                        <label>Production: {data.productionTime} hrs</label>
+                        <input type="range" min="0.1" max="40" step="0.1" value={data.productionTime} onChange={(e) => handleUpdate('productionTime', parseFloat(e.target.value))} className="slider" />
                     </div>
                 </div>
             </div>
 
             <div className="card" style={{ marginTop: '2rem' }}>
-                <h3>Lead Flow & Capacity</h3>
+                <h3>Activity Breakdown</h3>
                 <table className="data-table">
                     <thead>
                         <tr>
                             <th>Period</th>
-                            <th>Raw Leads</th>
+                            <th>Contacts</th>
                             <th>Qualified</th>
                             <th>Sales</th>
                             <th>Hours</th>
@@ -104,33 +121,36 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ data, onUpdate, onR
             </div>
 
             <div className="grid" style={{ marginTop: '2rem' }}>
-                <div className="card">
-                    <h4 style={{ color: 'var(--accent-primary)', marginBottom: '0.5rem' }}>Funnel Dynamics</h4>
+                <div className="card" style={{ borderLeft: '4px solid var(--accent-primary)' }}>
+                    <h4 style={{ color: 'var(--accent-primary)', marginBottom: '0.5rem' }}>Time Distribution</h4>
                     <p style={{ fontSize: '0.9rem', lineHeight: '1.4' }}>
-                        You spend <strong>{metrics.salesTimePercentage}%</strong> of your time on sales.
-                        To hit your goal, you need <strong>{metrics.weekly.rawLeadsNeeded} prospects</strong> every week.
-                        <strong> {metrics.weekly.qualifiedLeadsNeeded}</strong> must qualify for a closing call.
+                        Production: <strong>{((data.productionTime * metrics.weekly.unitsPlanned)).toFixed(1)}h/wk</strong><br />
+                        Sales: <strong>{((metrics.totalSalesTimePerSale * metrics.weekly.unitsPlanned)).toFixed(1)}h/wk</strong>
                     </p>
                 </div>
-                <div className="card">
-                    <h4 style={{ color: 'var(--accent-primary)', marginBottom: '0.5rem' }}>Work Breakdown</h4>
+                <div className="card" style={{ borderLeft: '4px solid var(--accent-secondary)' }}>
+                    <h4 style={{ color: 'var(--accent-secondary)', marginBottom: '0.5rem' }}>Strategic Fixes</h4>
                     <p style={{ fontSize: '0.9rem', lineHeight: '1.4' }}>
-                        Weekly Hours:<br />
-                        • Prospecting: {((metrics.prospectingHoursPerSale * metrics.weekly.unitsPlanned)).toFixed(1)}h<br />
-                        • Qualifying: {((metrics.qualificationHoursPerSale * metrics.weekly.unitsPlanned)).toFixed(1)}h<br />
-                        • Closing: {((data.closingMeetingTimeHours * metrics.weekly.unitsPlanned)).toFixed(1)}h<br />
-                        • Production: {((data.productionTime * metrics.weekly.unitsPlanned)).toFixed(1)}h
+                        {isOverCapacity ? (
+                            <>
+                                1. <strong>Raise Prices:</strong> High prices lower the "Volume" needed for the same profit.<br />
+                                2. <strong>Fix Funnel:</strong> Automate the prospecting or qualification stages.<br />
+                                3. <strong>Qualification:</strong> Increase friction to spend time only on high-intent leads.
+                            </>
+                        ) : (
+                            "Your balance is healthy. Scale volume when you're ready for more output."
+                        )}
                     </p>
                 </div>
-                <div className="card">
-                    <h4 style={{ color: 'var(--accent-primary)', marginBottom: '0.5rem' }}>Advice:</h4>
+                <div className="card" style={{ borderLeft: '4px solid var(--success)' }}>
+                    <h4 style={{ color: 'var(--success)', marginBottom: '0.5rem' }}>Economic Reality</h4>
                     <p style={{ fontSize: '0.9rem', lineHeight: '1.4' }}>
-                        {isOverCapacity
-                            ? `You are over capacity by ${(metrics.weekly.hoursNeeded - data.weeklyWorkHours).toFixed(1)} hrs/week. Automate the prospecting stage or increase your Qualification friction.`
-                            : `Your strategy is solid. Focus on maintaining a flow of ${metrics.weekly.rawLeadsNeeded} leads/week.`}
+                        Every hour you work on this business is worth <strong>${metrics.effectiveHourlyRate.toFixed(2)}</strong>.<br /><br />
+                        Focus on tasks where your personal input generates the most value.
                     </p>
                 </div>
             </div>
+
             <div style={{ textAlign: 'center', marginTop: '3rem' }}>
                 <button className="btn btn-ghost" onClick={onReset}>Start Over</button>
             </div>
