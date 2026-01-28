@@ -40,12 +40,57 @@ const TaskTimer: React.FC<TaskTimerProps> = ({ onTimeUpdate, initialTime = 0 }) 
         return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     };
 
+    const handleManualChange = (field: 'h' | 'm' | 's', value: string) => {
+        const val = parseInt(value) || 0;
+        const h = Math.floor(seconds / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        const s = seconds % 60;
+
+        let newTotal = seconds;
+        if (field === 'h') newTotal = val * 3600 + m * 60 + s;
+        if (field === 'm') newTotal = h * 3600 + val * 60 + s;
+        if (field === 's') newTotal = h * 3600 + m * 60 + val;
+
+        setSeconds(newTotal);
+    };
+
     return (
         <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}>
-            <span className="metric-label">Production Timer</span>
+            <span className="metric-label">Production Time</span>
             <div style={{ fontSize: '3rem', fontWeight: 700, fontFamily: 'monospace', color: 'var(--accent-primary)' }}>
                 {formatTime(seconds)}
             </div>
+
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <label style={{ fontSize: '0.6rem' }}>HRS</label>
+                    <input
+                        type="number"
+                        value={Math.floor(seconds / 3600)}
+                        onChange={(e) => handleManualChange('h', e.target.value)}
+                        style={{ width: '60px', textAlign: 'center', padding: '0.4rem' }}
+                    />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <label style={{ fontSize: '0.6rem' }}>MIN</label>
+                    <input
+                        type="number"
+                        value={Math.floor((seconds % 3600) / 60)}
+                        onChange={(e) => handleManualChange('m', e.target.value)}
+                        style={{ width: '60px', textAlign: 'center', padding: '0.4rem' }}
+                    />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <label style={{ fontSize: '0.6rem' }}>SEC</label>
+                    <input
+                        type="number"
+                        value={seconds % 60}
+                        onChange={(e) => handleManualChange('s', e.target.value)}
+                        style={{ width: '60px', textAlign: 'center', padding: '0.4rem' }}
+                    />
+                </div>
+            </div>
+
             <div style={{ display: 'flex', gap: '0.5rem' }}>
                 <button
                     className={`btn ${isActive ? 'btn-ghost' : 'btn-primary'}`}
