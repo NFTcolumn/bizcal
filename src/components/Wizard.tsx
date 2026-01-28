@@ -15,7 +15,8 @@ const Wizard: React.FC<WizardProps> = ({ onComplete }) => {
         yearlyIncomeGoal: 60000,
         leadsPerSale: 5,
         timePerLead: 0.5,
-        unitPrice: 100
+        unitPrice: 100,
+        targetVolume: 0
     });
 
     const nextStep = () => setStep(s => s + 1);
@@ -92,7 +93,7 @@ const Wizard: React.FC<WizardProps> = ({ onComplete }) => {
                     <div className="wizard-step">
                         <h2>Financial Goals</h2>
                         <div className="input-group">
-                            <label>How much do you want to make per year? (Net Profit)</label>
+                            <label>How much do you want to earn per year? (Net Profit)</label>
                             <div className="input-wrapper">
                                 <span>$</span>
                                 <input
@@ -100,6 +101,18 @@ const Wizard: React.FC<WizardProps> = ({ onComplete }) => {
                                     value={data.yearlyIncomeGoal || ''}
                                     onChange={e => updateData('yearlyIncomeGoal', parseFloat(e.target.value) || 0)}
                                     placeholder="60000"
+                                />
+                            </div>
+                        </div>
+                        <div className="input-group">
+                            <label>What is your planned sales price per unit?</label>
+                            <div className="input-wrapper">
+                                <span>$</span>
+                                <input
+                                    type="number"
+                                    value={data.unitPrice || ''}
+                                    onChange={e => updateData('unitPrice', parseFloat(e.target.value) || 0)}
+                                    placeholder="100"
                                 />
                             </div>
                         </div>
@@ -134,7 +147,11 @@ const Wizard: React.FC<WizardProps> = ({ onComplete }) => {
                         </div>
                         <div className="btn-row">
                             <button className="btn btn-ghost" onClick={prevStep}>Back</button>
-                            <button className="btn btn-primary" onClick={() => onComplete(data)}>Generate Plan</button>
+                            <button className="btn btn-primary" onClick={() => {
+                                const unitProfit = data.unitPrice - (data.productionCost + data.shippingCost);
+                                const volumeNeeded = Math.ceil(data.yearlyIncomeGoal / (unitProfit > 0 ? unitProfit : 1));
+                                onComplete({ ...data, targetVolume: volumeNeeded });
+                            }}>Generate Plan</button>
                         </div>
                     </div>
                 );

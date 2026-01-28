@@ -13,26 +13,24 @@ export const calculateWizardMetrics = (data: WizardData) => {
 
     const calculateForPeriod = (period: string, factor: number): GoalBreakdown => {
         const periodProfitGoal = yearlyProfitGoal / factor;
-        const periodCapacityHours = (data.weeklyWorkHours * 52) / factor;
+        const unitsPlanned = (data.targetVolume || 0) / factor;
 
-        const unitsNeeded = Math.ceil(periodProfitGoal / (unitProfit > 0 ? unitProfit : 0.01));
-        const hoursNeeded = unitsNeeded * totalTimePerUnit;
-
-        const maxUnits = Math.floor(periodCapacityHours / (totalTimePerUnit > 0 ? totalTimePerUnit : 0.1));
-        const actualProfit = maxUnits * unitProfit;
+        const leadsNeeded = unitsPlanned * data.leadsPerSale;
+        const hoursNeeded = unitsPlanned * totalTimePerUnit;
+        const projectedProfit = unitsPlanned * unitProfit;
 
         return {
             period,
-            unitsNeeded,
-            maxUnits,
+            unitsPlanned: Number(unitsPlanned.toFixed(1)),
+            leadsNeeded: Math.ceil(leadsNeeded),
             hoursNeeded: Number(hoursNeeded.toFixed(1)),
-            actualProfit: Math.round(actualProfit),
+            projectedProfit: Math.round(projectedProfit),
             targetProfit: Math.round(periodProfitGoal)
         };
     };
 
     const results = {
-        daily: calculateForPeriod('Daily', 52 * 5), // Assumes 5 day week
+        daily: calculateForPeriod('Daily', 52 * 5),
         weekly: calculateForPeriod('Weekly', 52),
         monthly: calculateForPeriod('Monthly', 12),
         quarterly: calculateForPeriod('Quarterly', 4),
@@ -40,13 +38,16 @@ export const calculateWizardMetrics = (data: WizardData) => {
         totalTimePerUnit,
         variableCostPerUnit,
         currentUnitProfit: unitProfit,
-        capacityHoursPerWeek: data.weeklyWorkHours
+        capacityHoursPerWeek: data.weeklyWorkHours,
+        maxAnnualCapacityHours: data.weeklyWorkHours * 52
     };
 
-    const effectiveHourlyRate = results.weekly.actualProfit / (data.weeklyWorkHours || 0.1);
+    const currentAnnualHours = data.targetVolume * totalTimePerUnit;
+    const effectiveHourlyRate = (data.targetVolume * unitProfit) / (currentAnnualHours || 0.1);
 
     return {
         ...results,
+        currentAnnualHours: Number(currentAnnualHours.toFixed(1)),
         effectiveHourlyRate: Number(effectiveHourlyRate.toFixed(2))
     };
 };

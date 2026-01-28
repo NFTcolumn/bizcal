@@ -7,13 +7,14 @@ export interface WizardData {
     leadsPerSale: number;       // Number of offers/convos to get 1 sale
     timePerLead: number;        // Total time spent per lead/offer in hours
     unitPrice: number;          // Current price
+    targetVolume: number;       // Annual units planned (adjustable lever)
 }
 
 export interface GoalBreakdown {
     period: string;
-    unitsNeeded: number;        // Units needed for GOAL
-    maxUnits: number;           // Units possible in capacity
-    hoursNeeded: number;
-    actualProfit: number;       // Profit at capacity
-    targetProfit: number;       // The goal profit
+    unitsPlanned: number;       // Units from volume slider
+    leadsNeeded: number;        // unitsPlanned * leadsPerSale
+    hoursNeeded: number;        // unitsPlanned * totalTimePerUnit
+    projectedProfit: number;    // profit from planned units
+    targetProfit: number;       // The static goal profit
 }
